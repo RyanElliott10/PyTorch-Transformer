@@ -27,7 +27,9 @@ raw_english = [
     "<sod> This is just a test of machine translation. <eod>",
     "<sod> My dog's name is Lanie and she's pretty cute. <eod>",
     "<sod> Foo and bar are the de facto dummy words in Computer Science. <eod>",
-    "<sod> March Madness is a bit boring this year. <eod>"
+    "<sod> March Madness is a bit boring this year. <eod>",
+    "<sod> I'm really missing my life in San Luis Obispo right now. All my "
+    "friends are out there yet I'm stuck in Algonquin. <eod>"
 ]
 
 raw_spanish = [
@@ -35,7 +37,10 @@ raw_spanish = [
     "<sod> El nombre de mi perro es Lanie y es muy linda. <eod>",
     "<sod> Foo y bar son las palabras ficticias de facto en Ciencias de la "
     "Computación. <eod>",
-    "<sod> March Madness es un poco aburrido este año. <eod>"
+    "<sod> March Madness es un poco aburrido este año. <eod>",
+    "<sod> Realmente extraño mi vida en San Luis Obispo en este momento. "
+    "Todos mis amigos están ahí fuera, pero yo estoy atrapado en Algonquin. "
+    "<eod>"
 ]
 
 BATCH_SIZE = len(raw_english)

@@ -1,6 +1,7 @@
 import math
 from typing import Tuple
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -76,7 +77,7 @@ class EncoderDecoderTransformer(nn.Module):
             torch.triu(..., diagnonal=1) is required to avoid masking the
             current token.
         """
-        mask = torch.triu(torch.ones(sz, sz), diagonal=1).byte()
+        mask = torch.triu(torch.ones(sz, sz), diagonal=1).bool()
         return mask.to(self.device)
 
     def forward(self, src: Tensor, tgt: Tensor) -> Tensor:
@@ -170,7 +171,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     learning_rate = 1e-4
-    epochs = 100
+    epochs = 50
     batch_size = BATCH_SIZE
 
     src_key_padding = train_iter.src_pad_idx
@@ -189,12 +190,11 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(epochs):
-        print(f'[Epoch {epoch} / {epochs}]')
+        print(f'\r[Epoch {epoch + 1} / {epochs}]', end='', flush=True)
 
         for (src, tgt) in train_iter:
             # We must right shift the tgt inputs into the decoder, as stated
-            # by the
-            # original paper Attention is All We Need
+            # by the original paper Attention is All We Need
             out = model(src, tgt[:-1])
 
             # Reshape according to use of nn.CrossEntropyLoss
@@ -211,18 +211,25 @@ def main():
             loss = criterion(out, tgt_loss)
             loss.backward()
 
-            torch.nn.utils.clip_grad_norm(model.parameters(), max_norm=1)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1)
 
             optimizer.step()
 
             if epoch == epochs - 1:
-                print(tgt)
-                print(tgt.shape)
-
                 softmax = nn.LogSoftmax(dim=1)
-                print(softmax(out).argmax(dim=1).reshape(-1, batch_size))
-                print(softmax(out).shape)
-                print(loss)
+                preds = softmax(out).argmax(dim=1).reshape(-1, batch_size)
+
+                print(f'\n\nTargets:\n{tgt}\n{tgt.shape}')
+                print(f'\nPredictions:\n{preds}\n{preds.shape}')
+                print(f'\nLoss: {loss}')
+
+                source = src[:, -1]
+                translated = preds[:, -1]
+                en_itos = np.vectorize(lambda x: train_iter.english.itos[x])
+                sp_itos = np.vectorize(lambda x: train_iter.spanish.itos[x])
+                source = ' '.join(en_itos(source))
+                translated = ' '.join(sp_itos(translated.numpy()))
+                print(f'\nEnglish: {source}\nSpanish: {translated}')
 
 
 if __name__ == '__main__':
